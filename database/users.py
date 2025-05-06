@@ -23,3 +23,11 @@ async def delete_user(user_id: int):
 async def update_user_photo(user_id: int, photo_id: str):
     await users_collection.update_one({"user_id": user_id}, {"$set": {"photo": photo_id}})
 
+async def get_all_photos():
+    return await users_collection.find({"photo": {"$ne": None}}).to_list(length=None)
+
+async def get_all_users():
+    return await users_collection.find().to_list(length=None)
+
+async def get_user_by_photo(photo_id: str):
+    return await users_collection.find_one({"photo": photo_id})

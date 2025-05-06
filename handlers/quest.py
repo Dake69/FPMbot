@@ -12,7 +12,7 @@ from database.users import users_collection
 
 router = Router()
 
-@router.callback_query_handler(lambda c: c.data == "enter_qr")
+@router.callback_query(lambda c: c.data == "enter_qr")
 async def ask_for_qr(callback_query: types.CallbackQuery, state: FSMContext):
     await state.set_state(QRCode.take_qrcode)
     await callback_query.message.answer("Відправте QR код.")

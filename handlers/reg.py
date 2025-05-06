@@ -38,7 +38,7 @@ async def send_welcome(message: Message, state: FSMContext):
     )
     await state.set_state(Registration.full_name)
 
-@router.message(Registration.full_name)
+@router.message(Registration.full_name, F.text)
 async def ask_phone_number(message: Message, state: FSMContext):
     await state.update_data(full_name=message.text) 
 
@@ -68,7 +68,7 @@ async def ask_previous_school(message: Message, state: FSMContext):
     await state.set_state(Registration.previous_school)
 
 
-@router.message(Registration.previous_school)
+@router.message(Registration.previous_school, F.text)
 async def finish_registration(message: Message, state: FSMContext):
     await state.update_data(previous_school=message.text)
 
