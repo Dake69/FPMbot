@@ -86,6 +86,4 @@ async def finish_registration(message: Message, state: FSMContext):
         "Дякуємо за реєстрацію! Ви можете почати користуватися нашим сервісом."
     )
 
-
-
     await state.clear()
