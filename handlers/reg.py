@@ -9,6 +9,7 @@ from config import *
 from FSM.allFSMs import *
 
 from database.users import get_user, save_user
+from database.db import db
 
 router = Router()
 

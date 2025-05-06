@@ -1,8 +1,8 @@
 import motor.motor_asyncio
 
-from config import MONGO_URI
+#from config import MONGO_URI
 
-client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
+client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://bilenkoartur6:yMVBWRoAeIqDfpBB@cluster0.bamjzjf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 
 db = client["autoWelder"]
 
