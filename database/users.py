@@ -19,3 +19,7 @@ async def get_user(user_id: int):
 
 async def delete_user(user_id: int):
     await users_collection.delete_one({"user_id": user_id})
+
+async def update_user_photo(user_id: int, photo_id: str):
+    await users_collection.update_one({"user_id": user_id}, {"$set": {"photo": photo_id}})
+
