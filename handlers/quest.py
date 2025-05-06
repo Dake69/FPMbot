@@ -8,7 +8,7 @@ from config import *
 
 from FSM.allFSMs import *
 
-from database.users import users_collection
+from database.users import users_collecti
 
 router = Router()
 
