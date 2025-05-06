@@ -8,3 +8,5 @@ class Registration(StatesGroup):
 
 class QRCode(StatesGroup):
     take_qrcode = State()
+class PhotoStates(StatesGroup):
+    waiting_for_photo = State()
