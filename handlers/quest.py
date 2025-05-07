@@ -29,29 +29,17 @@ async def ask_for_qr(callback_query: types.CallbackQuery, state: FSMContext):
         "✨ Дякуємо за вашу участь і бажаємо успіху у проходженні екскурсії! ❤️",
         parse_mode="HTML"
     )
-@router.message(QRCode.take_qrcode, F.photo)
+@router.message(QRCode.take_qrcode, F.text)
 async def receive_qr(message: types.Message, state: FSMContext):
-    photo = message.photo[-1]
-    
-    file_info = await bot.get_file(photo.file_id)
-    file_path = file_info.file_path
-
-
-    file_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_path}"  
-    response = requests.get(file_url)
-    
-    image = Image.open(io.BytesIO(response.content))
-    decoded_data = decode(image)
-
-    if not decoded_data:
+    try:
+        qr_code = int(message.text.strip())
+    except ValueError:
         await message.answer(
-            "❌ <b>Не вдалося розпізнати QR-код.</b>\n\n"
-            "📸 <i>Якщо проблема повторюється, зверніться до адміністратора для допомоги.</i>",
+            "❌ <b>Невірний формат QR-коду.</b>\n\n"
+            "📝 <i>Будь ласка, введіть код у текстовому форматі.</i>",
             parse_mode="HTML"
         )
         return
-    
-    qr_code = int(decoded_data[0].data.decode("utf-8"))
 
     user_col = await get_user_by_id_and_point(message.chat.id, qr_code)
 
@@ -60,13 +48,12 @@ async def receive_qr(message: types.Message, state: FSMContext):
             await message.answer("Ви вже ввели цей код.")
             return
 
- 
     point_passed = await get_point_by_code(qr_code)
 
     if point_passed is not None:
         users_collection.update_one(
             {"user_id": message.chat.id},
-            {"$addToSet": {"point_complited": qr_code}}  
+            {"$addToSet": {"point_complited": qr_code}}
         )
         await message.answer(
             f"🏛 <b>Вітаємо з проходженням точки!</b>\n\n"
@@ -77,10 +64,7 @@ async def receive_qr(message: types.Message, state: FSMContext):
         )
 
     completed_points = await get_point_complited_count(message.chat.id)
-    all_points = await points_collection.count_documents({}) 
-
-    print(completed_points)
-    print(all_points)
+    all_points = await points_collection.count_documents({})
 
     if completed_points == all_points:
         users_collection.update_one(
@@ -93,7 +77,7 @@ async def receive_qr(message: types.Message, state: FSMContext):
             "💪 Це був нелегкий шлях, але ви впоралися! Тепер у вас є можливість взяти участь у <b>розіграші</b> та виграти чудові призи. 🎁\n\n"
             "📩 <i>Слідкуйте за оновленнями, щоб не пропустити результати розіграшу!</i>\n\n"
             "❤️ Дякуємо, що ви з нами!",
-            parse_mode="HTML",
+            parse_mode="HTML"
         )
 
     await state.clear()
