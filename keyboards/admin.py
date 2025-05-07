@@ -56,6 +56,9 @@ def get_special_functions_keyboard():
             InlineKeyboardButton(text="🏆 Перевірка переможця", callback_data="check_creative_photo")
         ],
         [
+            InlineKeyboardButton(text="🎉 Розіграш серед учасників", callback_data="run_raffle")
+        ],
+        [
             InlineKeyboardButton(text="⬅️ Назад", callback_data="cancel_action")
         ]
     ])

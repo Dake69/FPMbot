@@ -608,3 +608,37 @@ async def points_statistics(callback: CallbackQuery):
         parse_mode="HTML",
         reply_markup=get_statistics_keyboard()
     )
+
+@router.callback_query(F.data == "run_raffle")
+async def run_raffle(callback: CallbackQuery):
+    users = await users_collection.find({"is_complited": True}).to_list(length=None)
+
+    if not users:
+        await callback.message.edit_text("❌ Немає учасників для розіграшу.")
+        return
+
+    winner = random.choice(users)
+    winner_name = winner.get("full_name", "Невідомий користувач")
+    winner_id = winner.get("user_id", "Невідомий ID")
+
+    try:
+        await callback.bot.send_message(
+            chat_id=winner_id,
+            text=(
+                f"🎉 <b>Вітаємо, {winner_name}!</b>\n\n"
+                f"🏆 Ви стали переможцем розіграшу!\n\n"
+                f"📩 З вами скоро зв'яжуться для вручення нагороди.\n\n"
+                f"❤️ Дякуємо за участь!"
+            ),
+            parse_mode="HTML"
+        )
+    except Exception as e:
+        print(f"Не вдалося відправити повідомлення переможцю {winner_id}: {e}")
+
+    await callback.message.edit_text(
+        f"🎉 <b>Розіграш завершено!</b>\n\n"
+        f"🏆 <b>Переможець:</b> {winner_name} (ID: {winner_id})\n\n"
+        f"📩 <b>З переможцем скоро зв'яжуться для вручення нагороди!</b>",
+        parse_mode="HTML",
+        reply_markup=get_special_functions_keyboard()
+    )
