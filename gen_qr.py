@@ -1,5 +1,5 @@
 import qrcode
 
-telegram_link = "https://t.me/italksdnubot?start=qr_code_123123"
+telegram_link = "781359"
 qr = qrcode.make(telegram_link)
 qr.save("telegram_qr.png")

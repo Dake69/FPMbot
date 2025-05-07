@@ -41,3 +41,9 @@ async def get_user_by_id_and_point(user_id: int, point_code: int):
             "point_complited": user.get("point_complited", [])
         }
     return None
+
+async def get_point_complited_count(user_id: int):
+    user = await users_collection.find_one({"user_id": user_id}, {"point_complited": 1})
+    if user and "point_complited" in user:
+        return len(user["point_complited"])
+    return 0

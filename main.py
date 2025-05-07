@@ -13,7 +13,7 @@ from database.db import test_connection
 
 
 async def main():
-    bot = Bot(token=TOKEN)
+    bot = Bot(token='TOKEN')
     dp = Dispatcher()
 
     await test_connection()
