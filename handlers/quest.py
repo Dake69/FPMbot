@@ -23,7 +23,12 @@ bot = Bot(token=TOKEN)
 @router.callback_query(lambda c: c.data == "enter_qr")
 async def ask_for_qr(callback_query: types.CallbackQuery, state: FSMContext):
     await state.set_state(QRCode.take_qrcode)
-    await callback_query.message.answer("Відправте фото QR коду.")
+    await callback_query.message.edit_text(
+        "📸 <b>Будь ласка, відправте фото QR-коду.</b>\n\n"
+        "🔍 <i>Переконайтеся, що QR-код чітко видно на фото, щоб ми могли його розпізнати.</i>\n\n"
+        "✨ Дякуємо за вашу участь і бажаємо успіху у проходженні екскурсії! ❤️",
+        parse_mode="HTML"
+    )
 
 @router.message(QRCode.take_qrcode, F.photo)
 async def receive_qr(message: types.Message, state: FSMContext):
@@ -40,7 +45,12 @@ async def receive_qr(message: types.Message, state: FSMContext):
     decoded_data = decode(image)
 
     if not decoded_data:
-        await message.answer("Не вдалося розпізнати QR-код. Будь ласка, спробуйте ще раз.")
+        await message.answer(
+            "❌ <b>Не вдалося розпізнати QR-код.</b>\n\n"
+            "📸 <i>Будь ласка, переконайтеся, що фото чітке та QR-код повністю видно.</i>\n\n"
+            "🔄 Спробуйте ще раз, відправивши нове фото QR-коду. Ми впевнені, що у вас все вийде! 💪",
+            parse_mode="HTML"
+        )
         return
     
     qr_code = int(decoded_data[0].data.decode("utf-8"))
@@ -60,7 +70,13 @@ async def receive_qr(message: types.Message, state: FSMContext):
             {"user_id": message.chat.id},
             {"$addToSet": {"point_complited": qr_code}}  
         )
-        await message.answer("Вітаємо з проходженням точки " + point_passed['name'] + "!\nОпис точки: " + point_passed['description'])
+        await message.answer(
+            f"🏛 <b>Вітаємо з проходженням точки!</b>\n\n"
+            f"📍 <b>Назва експоната:</b> <i>{point_passed['name']}</i>\n"
+            f"📝 <b>Опис:</b> <i>{point_passed['description']}</i>\n\n"
+            f"✨ Дякуємо, що ви берете участь у нашій екскурсії! Продовжуйте відкривати нові точки та дізнаватися більше цікавого. ❤️",
+            parse_mode="HTML"
+        )
 
     completed_points = await users_collection.count_documents({"user_id": message.chat.id})
     all_points = await points_collection.count_documents({}) 
@@ -73,6 +89,14 @@ async def receive_qr(message: types.Message, state: FSMContext):
             {"user_id": message.chat.id},
             {"$set": {"is_complited": True}}
         )
-        await message.answer("Вітаю! Ви успішно пройшли всі точки, долаючи кожен етап із впевненістю та наполегливістю. Тепер ви маєте можливість прийняти участь в розіграші!🎉")
+        await message.answer(
+            "🎉 <b>Вітаємо!</b> 🎉\n\n"
+            "✨ Ви успішно пройшли <b>всі точки</b>, долаючи кожен етап із впевненістю та наполегливістю. 🏆\n\n"
+            "💪 Це був нелегкий шлях, але ви впоралися! Тепер у вас є можливість взяти участь у <b>розіграші</b> та виграти чудові призи. 🎁\n\n"
+            "📩 <i>Слідкуйте за оновленнями, щоб не пропустити результати розіграшу!</i>\n\n"
+            "❤️ Дякуємо, що ви з нами!"
+            ,
+            parse_mode="HTML"
+        )
 
     await state.clear()

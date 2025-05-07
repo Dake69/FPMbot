@@ -22,12 +22,18 @@ async def request_photo(callback: CallbackQuery, state: FSMContext):
     user = await get_user(callback.from_user.id)
     if user["photo"]:
         await callback.message.edit_text(
-            "❌ Ви вже надіслали фото раніше. Ви можете зробити це лише один раз!"
+            "❌ <b>Ви вже надіслали фото раніше.</b>\n\n"
+            "📸 <i>На жаль, ви можете зробити це лише один раз.</i>\n\n"
+            "❤️ Дякуємо за вашу участь!",
+            parse_mode="HTML"
         )
         return
     else:
         await callback.message.edit_text(
-            "📸 Надішліть, будь ласка, ваше фото. Ви можете зробити це лише один раз!"
+            "📸 <b>Надішліть, будь ласка, ваше фото.</b>\n\n"
+            "🔒 <i>Зверніть увагу, що ви можете зробити це лише один раз!</i>\n\n"
+            "✨ Дякуємо за вашу участь і бажаємо успіху! ❤️",
+            parse_mode="HTML"
         )
         await state.set_state(PhotoStates.waiting_for_photo)
 
@@ -39,6 +45,13 @@ async def save_photo(message: Message, state: FSMContext):
     await update_user_photo(user_id=message.from_user.id, photo_id=photo_id)
 
     await message.delete()
-    await message.answer("✅ Ваше фото успішно збережено! Дякуємо за участь.", reply_markup=get_main_menu_keyboard())
+    await message.answer(
+        "✅ <b>Ваше фото успішно збережено!</b>\n\n"
+        "📸 <i>Дякуємо за вашу участь!</i>\n\n"
+        "💬 Нам буде дуже приємно, якщо ви викладете це фото в Instagram та тегнете нас: <b>@your_instagram_handle</b>.\n\n"
+        "❤️ Дякуємо, що ви з нами!",
+        parse_mode="HTML",
+        reply_markup=get_main_menu_keyboard()
+    )
 
     await state.clear()
