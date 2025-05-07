@@ -10,6 +10,8 @@ from FSM.allFSMs import *
 
 from database.users import users_collection
 
+from database.points import get_all_points
+
 router = Router()
 
 @router.callback_query(lambda c: c.data == "enter_qr")
@@ -19,10 +21,22 @@ async def ask_for_qr(callback_query: types.CallbackQuery, state: FSMContext):
 
 @router.message(QRCode.take_qrcode, F.text)
 async def receive_qr(message: types.Message, state: FSMContext):
-    qr_code = message.text.strip() 
-    users_collection.update_one(
-    {"user_id": message.chat.id},
-    {"$push": {"point_complited": qr_code}}
-)
+    qr_code = int(message.text.strip())
+    points_array = await get_all_points()
+    point_found = False
+
+
+    for point in points_array:
+        if (point['code'] == qr_code):
+            users_collection.update_one(
+            {"user_id": message.chat.id},
+            {"$push": {"point_complited": qr_code}})
+            await message.answer("Ваш код було прийнято!")
+            point_found = True
  
+    if point_found == False:
+        await message.answer("Код не було знайдено.")
+    
     await state.clear()
+
+    
