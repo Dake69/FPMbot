@@ -31,3 +31,13 @@ async def get_all_users():
 
 async def get_user_by_photo(photo_id: str):
     return await users_collection.find_one({"photo": photo_id})
+
+async def get_user_by_id_and_point(user_id: int, point_code: int):
+    user = await users_collection.find_one({"user_id": user_id, "point_complited": point_code})
+    if user:
+        return {
+            "user_id": user["user_id"],
+            "full_name": user.get("full_name", "Невідомий"),
+            "point_complited": user.get("point_complited", [])
+        }
+    return None
