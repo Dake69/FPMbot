@@ -40,16 +40,23 @@ def get_next_code_keyboard():
 
 @router.callback_query(lambda c: c.data == "enter_qr")
 async def ask_for_qr(callback_query: types.CallbackQuery, state: FSMContext):
-    await state.set_state(QRCode.take_qrcode)
-    await callback_query.message.edit_text(
-        "🔢 <b>Будь ласка, введіть код із QR-коду.</b>\n\n"
-        "🔍 <i>Переконайтеся, що ви правильно ввели всі цифри з QR-коду.</i>\n\n"
-        "✨ Дякуємо за вашу участь і бажаємо успіху у проходженні екскурсії! ❤️",
-        parse_mode="HTML",
-        reply_markup=get_cancel_keyboard()
+    user_col = await get_user(callback_query.message.chat.id)
 
-    )
-    await callback_query.answer()
+    if user_col['is_completed'] == True:
+        await callback_query.message.edit_text("🔍 <b>Ви вже пройшли всі можливі точки!</b>", 
+                                               parse_mode="HTML",
+                                               reply_markup=None)
+    else:
+        await state.set_state(QRCode.take_qrcode)
+        await callback_query.message.edit_text(
+            "🔢 <b>Будь ласка, введіть код із QR-коду.</b>\n\n"
+            "🔍 <i>Переконайтеся, що ви правильно ввели всі цифри з QR-коду.</i>\n\n"
+            "✨ Дякуємо за вашу участь і бажаємо успіху у проходженні екскурсії! ❤️",
+            parse_mode="HTML",
+            reply_markup=get_cancel_keyboard()
+
+        )
+        await callback_query.answer()
 
 @router.message(QRCode.take_qrcode, F.text)
 async def receive_qr(message: types.Message, state: FSMContext):
