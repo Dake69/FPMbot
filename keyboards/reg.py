@@ -3,7 +3,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 get_registration_keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="📸 Зробити фото", callback_data="make_photo"),
-            InlineKeyboardButton(text="📷 Відсканувати QR", callback_data="enter_qr")
+            InlineKeyboardButton(text="📷 Ввести код локації", callback_data="enter_qr")
         ]
     ])
 

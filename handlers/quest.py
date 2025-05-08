@@ -8,6 +8,8 @@ from config import TOKEN
 from PIL import Image
 import io
 import requests
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 
 from config import *
 
@@ -20,15 +22,35 @@ from database.points import get_point_by_code, get_all_points, points_collection
 router = Router()
 bot = Bot(token=TOKEN)
 
+def get_cancel_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="❌ Відмінити", callback_data="cancel_action")]
+    ])
+
+def get_main_menu_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🏠 Повернутися до головного меню", callback_data="main_menu")]
+    ])
+
+def get_next_code_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🔢 Відправити наступний код", callback_data="enter_qr")],
+        [InlineKeyboardButton(text="🏠 Повернутися до головного меню", callback_data="main_menu")]
+    ])
+
 @router.callback_query(lambda c: c.data == "enter_qr")
 async def ask_for_qr(callback_query: types.CallbackQuery, state: FSMContext):
     await state.set_state(QRCode.take_qrcode)
-    await callback_query.message.answer(
-        "📸 <b>Будь ласка, відправте фото QR-коду.</b>\n\n"
-        "🔍 <i>Переконайтеся, що QR-код чітко видно на фото, щоб ми могли його розпізнати.</i>\n\n"
+    await callback_query.message.edit_text(
+        "🔢 <b>Будь ласка, введіть код із QR-коду.</b>\n\n"
+        "🔍 <i>Переконайтеся, що ви правильно ввели всі цифри з QR-коду.</i>\n\n"
         "✨ Дякуємо за вашу участь і бажаємо успіху у проходженні екскурсії! ❤️",
-        parse_mode="HTML"
+        parse_mode="HTML",
+        reply_markup=get_cancel_keyboard()
+
     )
+    await callback_query.answer()
+
 @router.message(QRCode.take_qrcode, F.text)
 async def receive_qr(message: types.Message, state: FSMContext):
     try:
@@ -45,7 +67,13 @@ async def receive_qr(message: types.Message, state: FSMContext):
 
     if user_col and "point_complited" in user_col:
         if qr_code in user_col["point_complited"]:
-            await message.answer("Ви вже ввели цей код.")
+            await message.answer(
+                "❌ <b>Цей код вже був використаний.</b>\n\n"
+                "📍 <i>Ви вже пройшли цю точку. Спробуйте знайти іншу точку, щоб продовжити екскурсію.</i>\n\n"
+                "✨ Дякуємо за вашу участь і бажаємо успіху у відкритті нових точок! ❤️",
+                parse_mode="HTML",
+                reply_markup=get_main_menu_keyboard()
+            )
             return
 
     point_passed = await get_point_by_code(qr_code)
@@ -60,8 +88,13 @@ async def receive_qr(message: types.Message, state: FSMContext):
             f"📍 <b>Назва експоната:</b> <i>{point_passed['name']}</i>\n"
             f"📝 <b>Опис:</b> <i>{point_passed['description']}</i>\n\n"
             f"✨ Дякуємо, що ви берете участь у нашій екскурсії! Продовжуйте відкривати нові точки та дізнаватися більше цікавого. ❤️",
-            parse_mode="HTML"
+            parse_mode="HTML",
+            reply_markup=get_next_code_keyboard()
         )
+    else:
+        await message.answer("❌ <b>QR-код не знайдено.</b>\n\n"
+                       "🔍 <i>Переконайтеся, що ви правильно ввели код.</i>",
+                          parse_mode="HTML")
 
     completed_points = await get_point_complited_count(message.chat.id)
     all_points = await points_collection.count_documents({})
@@ -77,7 +110,8 @@ async def receive_qr(message: types.Message, state: FSMContext):
             "💪 Це був нелегкий шлях, але ви впоралися! Тепер у вас є можливість взяти участь у <b>розіграші</b> та виграти чудові призи. 🎁\n\n"
             "📩 <i>Слідкуйте за оновленнями, щоб не пропустити результати розіграшу!</i>\n\n"
             "❤️ Дякуємо, що ви з нами!",
-            parse_mode="HTML"
+            parse_mode="HTML",
+            reply_markup=get_main_menu_keyboard()
         )
 
     await state.clear()

@@ -63,7 +63,7 @@ async def ask_previous_school(message: Message, state: FSMContext):
     await state.update_data(phone_number=contact.phone_number)
 
     await message.answer(
-        "🏫 Дякуємо! Тепер вкажіть, будь ласка, назву вашого попереднього навчального закладу:"
+        "🏫 Дякуємо! Тепер вкажіть, будь ласка, назву вашого поточного навчального закладу:"
     )
     await state.set_state(Registration.previous_school)
 
@@ -94,6 +94,7 @@ async def finish_registration(message: Message, state: FSMContext):
     await state.clear()
 
 @router.callback_query(F.data == "main_menu")
+@router.callback_query(F.data == "cancel_action")
 async def send_activities_description(callback: CallbackQuery):
     await callback.message.edit_text(
         "🎉 <b>Наші активності під час екскурсії:</b>\n\n"
