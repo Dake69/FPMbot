@@ -25,7 +25,8 @@ async def request_photo(callback: CallbackQuery, state: FSMContext):
             "❌ <b>Ви вже надіслали фото раніше.</b>\n\n"
             "📸 <i>На жаль, ви можете зробити це лише один раз.</i>\n\n"
             "❤️ Дякуємо за вашу участь!",
-            parse_mode="HTML"
+            parse_mode="HTML",
+            reply_markup=get_main_menu_keyboard()
         )
         return
     else:
@@ -33,7 +34,8 @@ async def request_photo(callback: CallbackQuery, state: FSMContext):
             "📸 <b>Надішліть, будь ласка, ваше фото.</b>\n\n"
             "🔒 <i>Зверніть увагу, що ви можете зробити це лише один раз!</i>\n\n"
             "✨ Дякуємо за вашу участь і бажаємо успіху! ❤️",
-            parse_mode="HTML"
+            parse_mode="HTML",
+            reply_markup=get_cancel_keyboard()
         )
         await state.set_state(PhotoStates.waiting_for_photo)
 
@@ -48,7 +50,7 @@ async def save_photo(message: Message, state: FSMContext):
     await message.answer(
         "✅ <b>Ваше фото успішно збережено!</b>\n\n"
         "📸 <i>Дякуємо за вашу участь!</i>\n\n"
-        "💬 Нам буде дуже приємно, якщо ви викладете це фото в Instagram та тегнете нас: <b>@your_instagram_handle</b>.\n\n"
+        "💬 Нам буде дуже приємно, якщо ви викладете це фото в Instagram та тегнете нас: <b>@fam.it.dnu</b>.\n\n"
         "❤️ Дякуємо, що ви з нами!",
         parse_mode="HTML",
         reply_markup=get_main_menu_keyboard()
