@@ -38,14 +38,19 @@ def get_next_code_keyboard():
         [InlineKeyboardButton(text="🏠 Повернутися до головного меню", callback_data="main_menu")]
     ])
 
+def all_codes_entered_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🏠 Повернутися до головного меню", callback_data="main_menu")]
+    ])
+
 @router.callback_query(lambda c: c.data == "enter_qr")
 async def ask_for_qr(callback_query: types.CallbackQuery, state: FSMContext):
     user_col = await get_user(callback_query.message.chat.id)
 
-    if user_col['is_completed'] == True:
+    if user_col['is_complited'] == True:
         await callback_query.message.edit_text("🔍 <b>Ви вже пройшли всі можливі точки!</b>", 
                                                parse_mode="HTML",
-                                               reply_markup=None)
+                                               reply_markup=all_codes_entered_keyboard())
     else:
         await state.set_state(QRCode.take_qrcode)
         await callback_query.message.edit_text(
@@ -53,7 +58,7 @@ async def ask_for_qr(callback_query: types.CallbackQuery, state: FSMContext):
             "🔍 <i>Переконайтеся, що ви правильно ввели всі цифри з QR-коду.</i>\n\n"
             "✨ Дякуємо за вашу участь і бажаємо успіху у проходженні екскурсії! ❤️",
             parse_mode="HTML",
-            reply_markup=get_cancel_keyboard()
+            reply_markup=get_next_code_keyboard()
 
         )
         await callback_query.answer()
