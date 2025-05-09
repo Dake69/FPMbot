@@ -65,6 +65,9 @@ async def ask_for_qr(callback_query: types.CallbackQuery, state: FSMContext):
 
 @router.message(QRCode.take_qrcode, F.text)
 async def receive_qr(message: types.Message, state: FSMContext):
+    completed_points = await get_point_complited_count(message.chat.id)
+    all_points = await points_collection.count_documents({})
+    
     try:
         qr_code = int(message.text.strip())
     except ValueError:
@@ -95,21 +98,23 @@ async def receive_qr(message: types.Message, state: FSMContext):
             {"user_id": message.chat.id},
             {"$addToSet": {"point_complited": qr_code}}
         )
+        if (completed_points == all_points):
+            replyMarkup = None
+        else: replyMarkup = get_next_code_keyboard()
         await message.answer(
             f"🏛 <b>Вітаємо з проходженням точки!</b>\n\n"
             f"📍 <b>Назва експоната:</b> <i>{point_passed['name']}</i>\n"
             f"📝 <b>Опис:</b> <i>{point_passed['description']}</i>\n\n"
             f"✨ Дякуємо, що ви берете участь у нашій екскурсії! Продовжуйте відкривати нові точки та дізнаватися більше цікавого. ❤️",
             parse_mode="HTML",
-            reply_markup=get_next_code_keyboard()
+            reply_markup=replyMarkup
         )
     else:
         await message.answer("❌ <b>QR-код не знайдено.</b>\n\n"
                        "🔍 <i>Переконайтеся, що ви правильно ввели код.</i>",
                           parse_mode="HTML")
 
-    completed_points = await get_point_complited_count(message.chat.id)
-    all_points = await points_collection.count_documents({})
+    
 
     if completed_points == all_points:
         users_collection.update_one(
