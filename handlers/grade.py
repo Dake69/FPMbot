@@ -34,8 +34,6 @@ async def flash_admin_menu(message: Message, state: FSMContext):
         await message.answer("❌ У вас немає фото для оцінювання.")
         return
 
-    print(all_photos)
-
     if isinstance(all_photos[0], dict) and "photo" in all_photos[0]:
         photo_id = all_photos[0]["photo"]
     else:
@@ -68,7 +66,6 @@ async def process_grade(callback: CallbackQuery, state: FSMContext):
         await state.update_data(photos=photos)
 
         original_photo_id = current_photo["photo"]
-        print(f"Зберігаємо оригінальний photo_id: {original_photo_id}")
 
         await rate_photo(callback.from_user.id, original_photo_id, grade)
 

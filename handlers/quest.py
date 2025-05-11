@@ -58,7 +58,7 @@ async def ask_for_qr(callback_query: types.CallbackQuery, state: FSMContext):
             "🔍 <i>Переконайтеся, що ви правильно ввели всі цифри з QR-коду.</i>\n\n"
             "✨ Дякуємо за вашу участь і бажаємо успіху у проходженні екскурсії! ❤️",
             parse_mode="HTML",
-            reply_markup=get_next_code_keyboard()
+            reply_markup=get_cancel_keyboard()
 
         )
         await callback_query.answer()
@@ -71,7 +71,8 @@ async def receive_qr(message: types.Message, state: FSMContext):
         await message.answer(
             "❌ <b>Невірний формат QR-коду.</b>\n\n"
             "📝 <i>Будь ласка, введіть код у текстовому форматі.</i>",
-            parse_mode="HTML"
+            parse_mode="HTML",
+            reply_markup=get_next_code_keyboard()
         )
         return
 
@@ -84,7 +85,7 @@ async def receive_qr(message: types.Message, state: FSMContext):
                 "📍 <i>Ви вже пройшли цю точку. Спробуйте знайти іншу точку, щоб продовжити екскурсію.</i>\n\n"
                 "✨ Дякуємо за вашу участь і бажаємо успіху у відкритті нових точок! ❤️",
                 parse_mode="HTML",
-                reply_markup=get_main_menu_keyboard()
+                reply_markup=get_next_code_keyboard()
             )
             return
 
@@ -98,8 +99,22 @@ async def receive_qr(message: types.Message, state: FSMContext):
         completed_points = await get_point_complited_count(message.chat.id)
         all_points = await points_collection.count_documents({})
         if (completed_points == all_points):
+            users_collection.update_one(
+                {"user_id": message.chat.id},
+                {"$set": {"is_complited": True}}
+            )
+            await message.answer(
+                "🎉 <b>Вітаємо!</b> 🎉\n\n"
+                "✨ Ви успішно пройшли <b>всі точки</b>, долаючи кожен етап із впевненістю та наполегливістю. 🏆\n\n"
+                "💪 Це був нелегкий шлях, але ви впоралися! Тепер у вас є можливість взяти участь у <b>розіграші</b> та виграти чудові призи. 🎁\n\n"
+                "📩 <i>Слідкуйте за оновленнями, щоб не пропустити результати розіграшу!</i>\n\n"
+                "❤️ Дякуємо, що ви з нами!",
+                parse_mode="HTML",
+                reply_markup=get_main_menu_keyboard()
+            )
             replyMarkup = None
-        else: replyMarkup = get_next_code_keyboard()
+        else:
+            replyMarkup = get_next_code_keyboard()
         await message.answer(
             f"🏛 <b>Вітаємо з проходженням точки!</b>\n\n"
             f"📍 <b>Назва експоната:</b> <i>{point_passed['name']}</i>\n"
@@ -111,23 +126,7 @@ async def receive_qr(message: types.Message, state: FSMContext):
     else:
         await message.answer("❌ <b>QR-код не знайдено.</b>\n\n"
                        "🔍 <i>Переконайтеся, що ви правильно ввели код.</i>",
-                          parse_mode="HTML")
-
-    
-
-    if completed_points == all_points:
-        users_collection.update_one(
-            {"user_id": message.chat.id},
-            {"$set": {"is_complited": True}}
-        )
-        await message.answer(
-            "🎉 <b>Вітаємо!</b> 🎉\n\n"
-            "✨ Ви успішно пройшли <b>всі точки</b>, долаючи кожен етап із впевненістю та наполегливістю. 🏆\n\n"
-            "💪 Це був нелегкий шлях, але ви впоралися! Тепер у вас є можливість взяти участь у <b>розіграші</b> та виграти чудові призи. 🎁\n\n"
-            "📩 <i>Слідкуйте за оновленнями, щоб не пропустити результати розіграшу!</i>\n\n"
-            "❤️ Дякуємо, що ви з нами!",
-            parse_mode="HTML",
-            reply_markup=get_main_menu_keyboard()
-        )
+                          parse_mode="HTML",
+                          reply_markup=get_next_code_keyboard())
 
     await state.clear()

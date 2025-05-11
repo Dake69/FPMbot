@@ -95,7 +95,8 @@ async def finish_registration(message: Message, state: FSMContext):
 
 @router.callback_query(F.data == "main_menu")
 @router.callback_query(F.data == "cancel_action")
-async def send_activities_description(callback: CallbackQuery):
+async def send_activities_description(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
     await callback.message.edit_text(
         "🎉 <b>Наші активності під час екскурсії:</b>\n\n"
         "1️⃣ <b>Зробити найкреативніше фото з Райаном Гослінгом</b> 📸\n"
